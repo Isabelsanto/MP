@@ -1,0 +1,140 @@
+const $modal = document.getElementById('modal');
+const $descriptionInput = document.getElementById('description');
+const $priorityInput = document.getElementById('priority');
+const $deadlineInput = document.getElementById('deadline');
+const $columnInput = document.getElementById('column');
+const $idInput = document.getElementById('idInput');
+
+const $creationModeTitle = document.getElementById('creationModeTitle');
+const $editingModeTitle = document.getElementById('editingModeTitle');
+
+const $creationModeBtn = document.getElementById('creationModeBtn');
+const $editingModeBtn = document.getElementById('editingModeBtn');
+
+var tasklist = [];
+
+// Função para abrir o modal em modo de criação
+function openModal(data_column) {
+  $modal.style.display = "flex";
+
+  $columnInput.value = data_column;
+
+  $creationModeTitle.style.display = "block";
+  $creationModeBtn.style.display = "block";
+    
+  $editingModeTitle.style.display = "none";
+  $editingModeBtn.style.display = "none";
+
+}
+
+function openModalToedit(id) {
+  $modal.style.display = "flex";
+
+  $creationModeTitle.style.display = "none";
+  $creationModeBtn.style.display = "none";
+
+
+  $editingModeTitle.style.display = "block";
+  $editingModeBtn.style.display = "block";
+
+
+  const task = tasklist.find(task => task.id == id);
+
+  $idInput.value = task.id;
+  $descriptionInput.value = task.description;
+  $priorityInput.value = task.priority;
+  $deadlineInput.value = task.deadline;
+  $columnInput.value = task.column;
+
+  // Atualizar o botão "Cadastrar" no modo de edição
+  $creationModeBtn.textContent = "Salvar";
+}
+
+// Função para fechar o modal
+function closeModal() {
+  $modal.style.display = "none";
+
+  $idInput.value = "";
+  $descriptionInput.value = "";
+  $priorityInput.value = "";
+  $deadlineInput.value = "";
+  $columnInput.value = "";
+}
+
+function resetColumn() {
+  document.querySelector('[data-column="1"] .body .cards_List').innerHTML ='';
+  document.querySelector('[data-column="2"] .body .cards_List').innerHTML ='';
+  document.querySelector('[data-column="3"] .body .cards_List').innerHTML ='';
+  document.querySelector('[data-column="4"] .body .cards_List').innerHTML ='';
+}
+
+function generateCards() {
+
+  resetColumn();
+
+  tasklist.forEach(task => {
+    const formattedDate = moment(task.deadline).format('DD/MM/YYYY');
+    
+    const columnBody = document.querySelector(`[data-column="${task.column}"] .body .cards_List`);
+    
+    const card = `
+      <div class="card" ondblclick="openModalToedit(${task.id})">
+        <div class="info">
+          <b>Nome/Empresa:</b>
+          <span>${task.description}</span>
+        </div>
+        <div class="info">
+          <b>Prioridade:</b>
+          <span>${task.priority}</span>
+        </div>
+        <div class="info">
+          <b>Vencimento:</b>
+          <span>${formattedDate}</span>
+        </div>
+      </div>
+    `;
+    columnBody.innerHTML += card;
+  });
+}
+
+
+
+// Evento para fechar o modal após o carregamento da página
+window.addEventListener('load', () => {
+  closeModal();
+});
+
+function createTask() {
+  const newTask = {
+    id: Math.floor(Math.random() * 9999999),
+    description: $descriptionInput.value,
+    priority: $priorityInput.value,
+    deadline: $deadlineInput.value,
+    column: $columnInput.value,
+  };
+
+  tasklist.push(newTask);
+
+  closeModal();
+  generateCards();
+}
+
+
+function updateTask() {
+  const updatedTask = {
+    id: $idInput.value,
+    description: $descriptionInput.value,
+    priority: $priorityInput.value,
+    deadline: $deadlineInput.value,
+    column: $columnInput.value,
+  }
+
+  const index = tasklist.findIndex(task => task.id == updatedTask.id);
+  
+  if (index !== -1) {
+    tasklist[index] = updatedTask;
+  }
+
+  closeModal();
+  generateCards();
+}
